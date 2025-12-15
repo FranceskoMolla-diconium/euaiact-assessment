@@ -4,12 +4,27 @@ node_modules/
 # Environment variables
 .env.local
 .env
+.env.production
+.env.development
 
 # Build output
 dist/
+dist-ssr/
 
 # Logs
 *.log
 
 # OS files
 .DS_Store
+
+# Vercel
+.vercel
+api
+lambda/openai.ts
+deploy-frontend-aws.sh
+DEPLOY-FRONTEND.md
+deploy-aws.md
+*zip
+vercel.json
+setup*.sh
+.serverless

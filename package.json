@@ -6,16 +6,25 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:backend": "serverless deploy",
+    "deploy:frontend": "./deploy-frontend-aws.sh",
+    "deploy:all": "npm run deploy:backend && npm run build && npm run deploy:frontend"
   },
   "dependencies": {
-    "openai": "^6.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.943.0",
+    "@aws-sdk/client-lambda": "^3.943.0",
+    "@types/aws-lambda": "^8.10.159",
     "@types/node": "^22.14.0",
+    "@vercel/node": "^3.0.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "openai": "^6.8.1",
+    "serverless": "^3.40.0",
+    "serverless-esbuild": "^1.56.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

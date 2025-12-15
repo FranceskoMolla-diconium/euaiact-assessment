@@ -5,10 +5,57 @@
 
 
 1. Install dependencies:
-   `npm install`
-2. Set the `API` in [.env.local](.env.local) to your Open API key
+   ```bash
+   npm install
+   ```
+2. Create `.env.local` file and add your OpenAI API key:
+   ```
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
 3. Run the app:
-   `npm run dev`
+   ```bash
+   npm run dev
+   ```
+
+## Deploy to AWS (Secure with Lambda Functions)
+
+This app uses AWS Lambda functions to keep your API key secure on the server.
+
+### Quick Start with AWS
+
+1. **Configure AWS credentials** (one-time setup):
+   ```bash
+   aws configure
+   ```
+
+2. **Set your OpenAI API key**:
+   ```bash
+   export OPENAI_API_KEY=your_key_here
+   ```
+
+3. **Deploy to AWS**:
+   ```bash
+   npx serverless deploy
+   ```
+
+4. **Update frontend with your API URL**:
+   - Copy the API endpoint from the deploy output
+   - Create `.env.local` and add:
+     ```
+     VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/api/openai
+     ```
+
+5. **Build and deploy frontend**:
+   ```bash
+   npm run build
+   # Deploy dist/ folder to S3, Amplify, or any static host
+   ```
+
+See [deploy-aws.md](./deploy-aws.md) for detailed instructions.
+
+### Alternative: Deploy to Vercel/Netlify
+
+See [deploy-aws.md](./deploy-aws.md) for other deployment options including Vercel and Netlify.
 
 
 ## What is this? 
