@@ -18,13 +18,3 @@ dist-ssr/
 .DS_Store
 
 # Vercel
-.vercel
-api
-lambda/openai.ts
-deploy-frontend-aws.sh
-DEPLOY-FRONTEND.md
-deploy-aws.md
-*zip
-vercel.json
-setup*.sh
-.serverless
