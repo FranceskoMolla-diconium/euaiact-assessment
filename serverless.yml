@@ -1,0 +1,87 @@
+service: bmg-chatbot-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    JOBS_TABLE: ${self:service}-jobs-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - !GetAtt JobsTable.Arn
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-processOpenAIWorker
+
+functions:
+  # Quick endpoint to submit jobs
+  submitJob:
+    handler: lambda/submit-job.handler
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: api/openai
+          method: post
+          cors: true
+  
+  # Quick endpoint to check job status
+  getJobStatus:
+    handler: lambda/get-job-status.handler
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: api/openai/{jobId}
+          method: get
+          cors: true
+  
+  # Worker that processes OpenAI requests (can take up to 15 minutes)
+  processOpenAIWorker:
+    handler: lambda/openai-worker.handler
+    timeout: 900  # 15 minutes max
+    memorySize: 1024
+
+resources:
+  Resources:
+    JobsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-jobs-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: jobId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: jobId
+            KeyType: HASH
+        TimeToLiveSpecification:
+          Enabled: true
+          AttributeName: ttl
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    target: node20
+    platform: node

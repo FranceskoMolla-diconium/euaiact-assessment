@@ -1,15 +1,54 @@
-
-import OpenAI from "openai";
 import type { RiskLevel, StepResult, UseCase } from "../types";
 
-const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+// Get API endpoint from environment or use local development endpoint
+const API_ENDPOINT = import.meta.env.VITE_API_URL || '/api/openai';
 
-if (!API_KEY) {
-  console.error("OpenAI API key not found. Please set the VITE_OPENAI_API_KEY environment variable.");
-}
+// Submit job and poll for completion
+const callOpenAI = async (messages: Array<{ role: string; content: string }>, responseFormat?: { type: string }, model: string = 'gpt-5-nano') => {
+  // Submit job
+  const submitResponse = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages, responseFormat, model }),
+  });
 
-const openai = new OpenAI({ apiKey: API_KEY!, dangerouslyAllowBrowser: true });
+  if (!submitResponse.ok) {
+    throw new Error(`API call failed: ${submitResponse.statusText}`);
+  }
 
+  const { jobId } = await submitResponse.json();
+  console.log(`Job submitted: ${jobId}`);
+
+  // Poll for completion
+  const maxAttempts = 120; // 2 minutes total
+  const pollInterval = 1000; // 1 second
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+    const statusResponse = await fetch(`${API_ENDPOINT}/${jobId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!statusResponse.ok) {
+      throw new Error(`Status check failed: ${statusResponse.statusText}`);
+    }
+
+    const status = await statusResponse.json();
+    console.log(`Job ${jobId} status: ${status.status} (attempt ${attempt + 1}/${maxAttempts})`);
+
+    if (status.status === 'completed') {
+      return status.result;
+    }
+
+    if (status.status === 'failed') {
+      throw new Error(status.error || 'Job failed');
+    }
+  }
+
+  throw new Error('Job timed out waiting for completion');
+};
 interface AnalysisResponse {
   is_prohibited?: boolean;
   is_high_risk?: boolean;
@@ -18,27 +57,22 @@ interface AnalysisResponse {
 }
 
 export const analyzeUseCase = async (prompt: string, schema: object): Promise<AnalysisResponse> => {
-  if (!API_KEY) {
-    console.warn("⚠️ API Key not configured");
-    return Promise.resolve({ reason: "API Key not configured." });
-  }
-
   console.log("🤖 Calling OpenAI API (analyzeUseCase) with model: gpt-5-nano");
   console.log("📝 Prompt length:", prompt.length, "characters");
 
   try {
     const startTime = Date.now();
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5-nano',
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-    });
+    const result = await callOpenAI(
+      [{ role: "user", content: prompt }],
+      { type: "json_object" },
+      'gpt-5-nano'
+    );
     const duration = Date.now() - startTime;
     
     console.log(`✅ OpenAI response received in ${duration}ms`);
-    console.log("📊 Tokens used:", response.usage?.total_tokens || "N/A");
+    console.log("📊 Tokens used:", result.usage?.total_tokens || "N/A");
     
-    const text = response.choices[0].message.content;
+    const text = result.content;
     if (!text) {
         console.error("❌ No content in response");
         return { reason: "No response from AI." };
@@ -60,26 +94,18 @@ export const analyzeUseCase = async (prompt: string, schema: object): Promise<An
 
 
 const generateText = async (prompt: string, context: string = "text generation"): Promise<string> => {
-    if (!API_KEY) {
-      console.warn("⚠️ API Key not configured");
-      return "API Key not configured.";
-    }
-  
     console.log(`🤖 Calling OpenAI API (${context}) with model: gpt-5-nano`);
     console.log("📝 Prompt length:", prompt.length, "characters");
   
     try {
       const startTime = Date.now();
-      const response = await openai.chat.completions.create({
-        model: 'gpt-5-nano',
-        messages: [{ role: "user", content: prompt }],
-      });
+      const result = await callOpenAI([{ role: "user", content: prompt }], undefined, 'gpt-5-nano');
       const duration = Date.now() - startTime;
       
       console.log(`✅ OpenAI response received in ${duration}ms`);
-      console.log("📊 Tokens used:", response.usage?.total_tokens || "N/A");
+      console.log("📊 Tokens used:", result.usage?.total_tokens || "N/A");
       
-      const content = response.choices[0].message.content ?? "No response from AI.";
+      const content = result.content ?? "No response from AI.";
       console.log(`✓ Response length: ${content.length} characters`);
       return content;
     } catch (error) {
