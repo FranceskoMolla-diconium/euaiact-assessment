@@ -292,4 +292,3 @@ overview5.png: the first page of the pdf report that is generated, it should con
 
 overview6.png: the executive summary of why the actions were taken etc, this document should ideally be VERY transparent. It needs to stand up to legal tests of why these decisions were made, so the LLM citing the EU AI Act should be in here. 
  <img width="827" height="668" alt="overview6" src="https://github.com/user-attachments/assets/9a1978f9-fdcd-402b-9117-0609fdbda5c9" />
-
