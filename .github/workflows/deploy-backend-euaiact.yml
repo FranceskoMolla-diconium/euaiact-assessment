@@ -21,7 +21,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::155574108262:role/AWSReservedSSO_AdministratorAccess_b23e7ac0552e2f2d
+          role-to-assume: arn:aws:iam::155574108262:role/test-OICD-connection
           aws-region: eu-north-1
 
       - name: Install
