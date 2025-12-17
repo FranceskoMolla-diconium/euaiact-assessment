@@ -1,0 +1,21 @@
+{
+  "name": "euaiact-assessment-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.943.0",
+    "@aws-sdk/client-lambda": "^3.943.0",
+    "@types/aws-lambda": "^8.10.159",
+    "@types/node": "^22.14.0",
+    "openai": "^6.8.1",
+    "serverless": "^3.40.0",
+    "serverless-esbuild": "^1.56.1",
+    "typescript": "~5.8.2"
+  }
+}

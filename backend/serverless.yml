@@ -30,7 +30,7 @@ provider:
 functions:
   # Quick endpoint to submit jobs
   submitJob:
-    handler: lambda/submit-job.handler
+    handler: src/handlers/submit-job.handler
     timeout: 10
     memorySize: 256
     events:
@@ -41,7 +41,7 @@ functions:
   
   # Quick endpoint to check job status
   getJobStatus:
-    handler: lambda/get-job-status.handler
+    handler: src/handlers/get-job-status.handler
     timeout: 10
     memorySize: 256
     events:
@@ -52,7 +52,7 @@ functions:
   
   # Worker that processes OpenAI requests (can take up to 15 minutes)
   processOpenAIWorker:
-    handler: lambda/openai-worker.handler
+    handler: src/handlers/openai-worker.handler
     timeout: 900  # 15 minutes max
     memorySize: 1024
 

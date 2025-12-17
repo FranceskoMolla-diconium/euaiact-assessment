@@ -18,3 +18,14 @@ dist-ssr/
 .DS_Store
 
 # Vercel
+# Frontend specific
+frontend/dist/
+frontend/node_modules/
+
+# Backend specific
+backend/dist/
+backend/node_modules/
+backend/.serverless/
+
+# Keep root level ignores
+artifacts.zip
